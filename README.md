@@ -12,7 +12,7 @@ Para su desarrollo se utilizo python 3.9.7 y ursina 4.0.0. Probablemente funcion
 La cámara se controla con el mouse y se dispara con el click izquierdo. Para cerrar el juego se puede utilizar o "esc" o shift+q
 
 
-##Más información sobre el desarrollo
+## Más información sobre el desarrollo
 
 
 Actualmente únicamente esta adaptado un escenario equivalente a "1wall6targets TE"
