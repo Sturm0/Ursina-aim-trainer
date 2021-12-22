@@ -1,0 +1,3 @@
+#Archivo de configuraciones
+# True=Activado False=Desactivado
+Pantalla_completa=False

@@ -3,45 +3,78 @@ from random import uniform
 from ursina.prefabs.first_person_controller import FirstPersonController
 from random import randint
 from time import time
-app = Ursina()
-player = FirstPersonController(y=2,origin_y=5,position=(0,2,-3))
+import datetime
+from os import system,name
+#app = Ursina(fullscreen=True)
+print("Ingrese 1 o 2 respectivamente para elegir un modo")
+print("(1) Free")
+print("(2) Challenge")
+eleccion_usuario = int(input())
+salir = False
 
+with open("Configuraciones.txt",'r') as archivo:
+    for each in archivo:
+        if each[0] != "#":
+            if eval(each.split("=")[1]):
+                app = Ursina(fullscreen=True)
+            else:
+                app = Ursina()
+
+player = FirstPersonController(position=(0,10,-5)) # por alguna razón si pongo un Y inicial más lógico el jugador se empieza a caer del mundo (ni idea)
+player.cursor.color = color.black
+player.speed = 0
 ground = Entity(model="plane",scale=(20,1,20),color=color.white,texture="white_cube",texture_scale=(20,20),collider="box")
-#cube = Entity(model="cube",scale=(1,1,1),position=(0,0,0),color=color.white,collider="box")
-pared1 = Entity(model="quad",scale=(20,10,1),position=(0,5,10),color=color.white,texture="white_cube",texture_scale=(20,16)) #,collider="box"
+pared1 = Entity(model="quad",scale=(20,10,1),position=(0,5,10),color=color.white,texture="white_cube",texture_scale=(20,16))
 pared2 = duplicate(pared1, position=(-10,5,0),rotation_y = -90)
 pared3 = duplicate(pared1, position=(10,5,0),rotation_y = 90)
 pared4 = duplicate(pared1, position=(0,5,-10),rotation_y = 180)
-esfera = Entity(model="sphere",scale=(1,1,1),color=color.red,collider="box",position=(0,2,9))
 
 pared1.double_sided = True
-#pared1.rotation_y = 90
 esferas = []
-esferas.append(esfera)
-contador = 0
-
+contador_eliminaciones = 0
+contador_fallos = 0
 inicio_tiempo = time()
+
 for each in range(0,5):
-    esferas.append(Entity(model="sphere",scale=(1,1,1),color=color.red,collider="box",position=(randint(-9,9),randint(1,9),9)))
+    esferas.append(Entity(model="sphere",scale=(.8,.8,.8),color=color.red,collider="box",position=(randint(-9,9),randint(1,9),9)))
+
+Text.size = 0.025
+Text.default_resolution = 1080 * Text.size
+
+info = Text(text="Tiempo: "+str(datetime.timedelta(seconds=round(time()-inicio_tiempo))))
+info.x = -.86
+info.y = .47
+info.origin = (-.5,.5)
+info.background = True
+info.visible = True
 def input(key):
-    global contador
+    global contador_eliminaciones, contador_fallos, salir
     if key == "left mouse down":
         Audio("shot.mp3")
         for each in esferas:
             if each.hovered:
                 destroy(each)
                 esferas.remove(each)
-                contador += 1
+                contador_eliminaciones += 1
+    elif key == "escape":
+        salir = True
+    else:
+        contador_fallos += 1
 def update():
-    global acumuladores, x, z, esferas, poner_esfera, contador
+    global esferas, poner_esfera, contador_eliminaciones, contador_fallos,inicio_tiempo, info, salir
     if player.position[1] < -20:
-        player.position = (2,1,2)
+        player.position = (0,10,-5)
 
     if len(esferas) < 5:
-        esferas.append(Entity(model="sphere",scale=(1,1,1),color=color.red,collider="box",position=(randint(-9,9),randint(1,9),9)))
-    if time() - inicio_tiempo > 60:
-        print(contador)
+        esferas.append(Entity(model="sphere",scale=(.8,.8,.8),color=color.red,collider="box",position=(randint(-9,9),randint(1,9),9)))
+    if salir or (eleccion_usuario==2 and time() - inicio_tiempo > 60):
+        if name == "nt":
+            system("cls")
+        else:
+            system("clear")
+        print("Eliminaciones:",contador_eliminaciones)
+        print("Fallos:",contador_fallos)
         exit()
-
+    info.text ="Tiempo: "+str(datetime.timedelta(seconds=round(time()-inicio_tiempo)))
 
 app.run()
