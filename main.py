@@ -15,10 +15,14 @@ salir = False
 with open("Configuraciones.txt",'r') as archivo:
     for each in archivo:
         if each[0] != "#":
-            if eval(each.split("=")[1]):
-                app = Ursina(fullscreen=True)
+            if each.split("=")[0] == "Pantalla_completa":
+                if eval(each.split("=")[1]):
+                    app = Ursina(fullscreen=True)
+                else:
+                    app = Ursina()    
             else:
-                app = Ursina()
+                escenario = each.split("=")[1]
+                
 
 player = FirstPersonController(position=(0,10,-5)) # por alguna razón si pongo un Y inicial más lógico el jugador se empieza a caer del mundo (ni idea)
 player.cursor.color = color.black
@@ -48,18 +52,25 @@ info.origin = (-.5,.5)
 info.background = True
 info.visible = True
 def input(key):
-    global contador_eliminaciones, contador_fallos, salir
+    global contador_eliminaciones, contador_fallos, salir, pared1
     if key == "left mouse down":
         Audio("shot.mp3")
+        acerto = False
         for each in esferas:
             if each.hovered:
                 destroy(each)
                 esferas.remove(each)
                 contador_eliminaciones += 1
+                acerto = True
+        if not acerto:
+            contador_fallos += 1
+            print(contador_fallos)
+        # if pared1.hovered: #esta es la forma más "limpia" de hacerlo pero por alguna razón no parece estar funcionando bien
+        #     contador_fallos += 1
+                
     elif key == "escape":
         salir = True
-    else:
-        contador_fallos += 1
+    
 def update():
     global esferas, poner_esfera, contador_eliminaciones, contador_fallos,inicio_tiempo, info, salir
     if player.position[1] < -20:

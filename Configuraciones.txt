@@ -1,3 +1,6 @@
 #Archivo de configuraciones
 # True=Activado False=Desactivado
 Pantalla_completa=False
+#Elegir escenario
+Número=1
+#El escenario debe ser un número entero
