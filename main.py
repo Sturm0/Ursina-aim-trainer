@@ -43,6 +43,7 @@ contador_fallos = 0
 inicio_tiempo = obtener_tiempo()
 cadencia = 5
 grados = 0
+tiro_sonido = Audio("shot.mp3")
 
 if escenario == 1:
     for each in range(0,5):
@@ -61,6 +62,7 @@ info.background = True
 info.visible = True
 def input(key):
     global contador_eliminaciones, contador_fallos, salir, pared1, escenario, cadencia
+
     if escenario == 1 and key == "left mouse down":
         Audio("shot.mp3")
         acerto = False
@@ -72,17 +74,15 @@ def input(key):
                     esferas.remove(each) # ¿ si hago esto es necesario lo de arriba? fijarse
                     contador_eliminaciones += 1
                     acerto = True
-        # elif escenario == 1:
-        #     contador_eliminaciones += 1
 
         if not acerto:
             contador_fallos += 1
         # if pared1.hovered: #esta es la forma más "limpia" de hacerlo pero por alguna razón no parece estar funcionando bien
         #     contador_fallos += 1
 
-    elif escenario == 2 and (held_keys['left mouse down'] or held_keys['u']): # 'left mouse down' <-- no esta funcionando
-        if cadencia == 5:
-            Audio("shot.mp3") # <-- buscar algo mejor para tiro de ametralladora
+    elif escenario == 2 and (held_keys['left mouse']): # 'left mouse down' <-- no esta funcionando
+        if cadencia == 7:
+            Audio("shot.mp3") # <-- buscar algo mejor para ronda de ametralladora
             acerto = False
             for each in esferas:
                 if each.hovered:
@@ -90,7 +90,6 @@ def input(key):
                     acerto = True
             if not acerto:
                 contador_fallos += 1
-                print(contador_fallos)
             cadencia = 0
         else:
             cadencia += 1
@@ -98,19 +97,20 @@ def input(key):
     elif key == "escape":
         salir = True
 
-    #después revisar mejor este caso, por ahora utilizar "u" ya que parece funcionar
-    # held keys tiene un comportamiento diferente si es "u" o si es "left mouse down", parece que lo mismo ocurre con todas las teclas con respescto a "left mouse down", "left mouse" solo tampoco parece tener el mismo comportamiento que el resto de teclas
-    #print("Tecla left mouse down HELD KEYS: ",held_keys['left mouse down'])
-    #print("Tecla U:",held_keys['u'])
-    #print("Tecla left mouse down KEY= :",key == "left mouse down")
-    
-    if held_keys['left mouse'] or held_keys['u'] or mouse.left:
-        print("it works !")
+    # held keys tiene un comportamiento diferente si es "u" o si es "left mouse down", parece que lo mismo ocurre con todas las teclas con respecto a "left mouse down", "left mouse" solo tampoco parece tener el mismo comportamiento que el resto de teclas
+    # if held_keys['left mouse']:
+    #     print("it works !",randint(0,255))
+    #extrañamente el bloque de código anterior en un programa mínimo sí funciona bien puesto en input(), en el caso de este programa solo parece funcionar como se espera dentro de update()
 
 
 arriba = True
 def update():
     global esferas, poner_esfera, contador_eliminaciones, contador_fallos,inicio_tiempo, info, salir, escenario, arriba, grados
+    
+    if held_keys['left mouse']: #para más información sobre porque puse esto acá y no en input() directo referir a los comentarios de la línea ~100-108
+       input('left mouse')
+
+
     if player.position[1] < -20:
         player.position = (0,10,-5)
 
@@ -140,7 +140,10 @@ def update():
             system("cls")
         else:
             system("clear")
-        print("Eliminaciones:",contador_eliminaciones)
+        if escenario == 2:
+            print("Aciertos:",contador_eliminaciones)            
+        else:
+            print("Eliminaciones:",contador_eliminaciones)
         print("Fallos:",contador_fallos)
         exit()
     info.text ="Tiempo: "+str(datetime.timedelta(seconds=round(obtener_tiempo()-inicio_tiempo)))
