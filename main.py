@@ -1,5 +1,5 @@
 from ursina import *
-from random import uniform, randint
+from random import uniform, randint, choice
 from ursina.prefabs.first_person_controller import FirstPersonController
 from time import time as obtener_tiempo
 import datetime
@@ -27,6 +27,7 @@ with open("Configuraciones.txt",'r') as archivo:
                 
 
 player = FirstPersonController(position=(0,10,-5)) # por alguna razón si pongo un Y inicial más lógico el jugador se empieza a caer del mundo (ni idea)
+
 player.cursor.color = color.black
 player.speed = 0
 
@@ -44,12 +45,18 @@ inicio_tiempo = obtener_tiempo()
 cadencia = 5
 grados = 0
 tiro_sonido = Audio("shot.mp3")
+cambiar_direccion = 2
 
 if escenario == 1:
     for each in range(0,5):
         esferas.append(Entity(model="sphere",scale=(.8,.8,.8),color=color.red,collider="box",position=(randint(-9,9),randint(1,9),9)))
 elif escenario == 2:
     esferas.append(Entity(model="sphere",scale=(1,1,1),color=color.red,collider="box",position=(0,4,9)))
+elif escenario == 3:
+    esferas.append(Entity(model="sphere",scale=(1.5,5,1),color=color.red,collider="box",position=(0,2.5,9))) #la idea es en algún momento remplazarlo por un cilindro o algo que se vea más como lo de CloseLongStrafes del Kovaak
+    player.position = (0,5,0)
+z_sig = 1 #solo es usado cuando el escenario es el 3
+x_sig = 1 #solo es usado cuando el escenario es el 3
 
 Text.size = 0.025
 Text.default_resolution = 1080 * Text.size
@@ -61,10 +68,11 @@ info.origin = (-.5,.5)
 info.background = True
 info.visible = True
 def input(key):
-    global contador_eliminaciones, contador_fallos, salir, pared1, escenario, cadencia
-
+    global contador_eliminaciones, contador_fallos, salir, pared1, escenario, cadencia, tiro_sonido
+    
     if escenario == 1 and key == "left mouse down":
-        Audio("shot.mp3")
+        
+        tiro_sonido.play()
         acerto = False
 
         if escenario == 1:
@@ -80,9 +88,9 @@ def input(key):
         # if pared1.hovered: #esta es la forma más "limpia" de hacerlo pero por alguna razón no parece estar funcionando bien
         #     contador_fallos += 1
 
-    elif escenario == 2 and (held_keys['left mouse']): # 'left mouse down' <-- no esta funcionando
+    elif (escenario == 2 or escenario == 3) and (held_keys['left mouse']): # 'left mouse down' <-- no esta funcionando
         if cadencia == 7:
-            Audio("shot.mp3") # <-- buscar algo mejor para ronda de ametralladora
+            tiro_sonido.play() # <-- buscar algo mejor para ronda de ametralladora
             acerto = False
             for each in esferas:
                 if each.hovered:
@@ -105,11 +113,10 @@ def input(key):
 
 arriba = True
 def update():
-    global esferas, poner_esfera, contador_eliminaciones, contador_fallos,inicio_tiempo, info, salir, escenario, arriba, grados
+    global esferas, poner_esfera, contador_eliminaciones, contador_fallos,inicio_tiempo, info, salir, escenario, arriba, grados, cambiar_direccion,x_sig,z_sig
     
     if held_keys['left mouse']: #para más información sobre porque puse esto acá y no en input() directo referir a los comentarios de la línea ~100-108
        input('left mouse')
-
 
     if player.position[1] < -20:
         player.position = (0,10,-5)
@@ -123,17 +130,47 @@ def update():
             esferas[0].z = math.sin(math.radians(grados))*10
             esferas[0].y = math.cos(math.radians(grados))*10
             grados += 50*time.dt
+            if round(obtener_tiempo()-inicio_tiempo) == cambiar_direccion:
+                print("Entro :D")
+                cambiar_direccion += 1
+                if randint(0,1) == 1:
+                    arriba = False
+                    print("cambio de dirección")
             if grados > 90:
                 arriba = False
         else:                
             grados -= 50*time.dt
 
+            if round(obtener_tiempo()-inicio_tiempo) == cambiar_direccion:
+                print("Entro :D")
+                cambiar_direccion += 1
+                if randint(0,1) == 1:
+                    arriba = True
+                    print("cambio de dirección")
             if grados < 0:
                 arriba = True
                 
         esferas[0].z = math.sin(math.radians(grados))*10
         esferas[0].y = math.cos(math.radians(grados))*10
+    elif escenario == 3:
+        esferas[0].z += 5*time.dt*z_sig
+        esferas[0].x += 5*time.dt*x_sig
+        #print("z: ",esferas[0].z,"x: ",esferas[0].x)
 
+        if round(obtener_tiempo()-inicio_tiempo) == cambiar_direccion:
+                cambiar_direccion += 1
+                z_sig = choice((-1,1))
+                x_sig = choice((-1,1))
+
+        if esferas[0].z >= 10 or (esferas[0].z >= -3 and esferas[0].z <= 0 and esferas[0].x >= -3 and esferas[0].x <= 3):
+            z_sig = -1
+        elif esferas[0].z <= -10 or (esferas[0].z >= 0 and esferas[0].z <= 3 and esferas[0].x >= -3 and esferas[0].x <= 3):
+            z_sig = 1
+
+        if esferas[0].x > 10:
+            x_sig = -1
+        elif esferas[0].x < -10:
+            x_sig = 1
 
     if salir or (eleccion_usuario==2 and obtener_tiempo() - inicio_tiempo > 60):
         if name == "nt":

@@ -2,5 +2,5 @@
 # True=Activado False=Desactivado
 Pantalla_completa=False
 #Elegir escenario
-Número=2
+Número=3
 #El escenario debe ser un número entero
