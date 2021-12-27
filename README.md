@@ -18,4 +18,4 @@ La cámara se controla con el mouse y se dispara con el click izquierdo. Para ce
 ## Más información sobre el desarrollo
 
 
-Actualmente esta adaptado un escenario equivalente a "1wall6targets TE" y "Vertical Long Strafes"
+Actualmente estan adaptados escenarios equivalentes a "1wall6targets TE", "Vertical Long Strafes" y "Close Long Strafes"
