@@ -1,8 +1,8 @@
 #Archivo de configuraciones
 # True=Activado False=Desactivado
-Pantalla_completa=False
+Pantalla_completa=True
 #Elegir escenario
-Número=5
+Número=1
 #El escenario debe ser un número entero
 #Lista de escenarios
 # 1 equivalente a "1wall6targets TE"

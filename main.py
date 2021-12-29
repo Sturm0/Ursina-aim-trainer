@@ -49,7 +49,7 @@ tiro_sonido = Audio("shot.mp3")
 cambiar_direccion = 2
 
 if escenario == 1:
-    for each in range(0,5):
+    for each in range(0,6):
         esferas.append(Entity(model="sphere",scale=(.8,.8,.8),color=color.red,collider="box",position=(randint(-9,9),randint(1,9),9)))
 elif escenario == 2:
     esferas.append(Entity(model="sphere",scale=(1,1,1),color=color.red,collider="box",position=(0,4,9)))
@@ -145,7 +145,7 @@ def update():
         player.position = (0,10,-5)
 
     if escenario == 1:
-        if len(esferas) < 5:
+        if len(esferas) < 6:
             esferas.append(Entity(model="sphere",scale=(.8,.8,.8),color=color.red,collider="box",position=(randint(-9,9),randint(1,9),9)))
     elif escenario == 2:
         

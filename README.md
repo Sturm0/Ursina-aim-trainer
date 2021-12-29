@@ -14,6 +14,11 @@ Al iniciar se pregunta por el modo "free" o "challenge". "Free" es tiempo ilimit
 
 La cámara se controla con el mouse y se dispara con el click izquierdo. Para cerrar el juego se puede utilizar o "esc" o shift+q
 
+## Screenshot (ejemplo)
+
+
+![1wall6targets TE](./screenshots/'1wall6targets TE'.png)
+
 
 ## Más información sobre el desarrollo
 
