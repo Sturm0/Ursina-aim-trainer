@@ -64,10 +64,14 @@ elif escenario == 4:
     for each in (pared1,pared2,pared3,pared4):
         each.scale = (20,20,1)
         each.y = 10
+elif escenario == 5:
+    for each in range(0,5):
+        esferas.append([Entity(model="cube",scale=(1.5,1.5,1.5),color=color.red,collider="box",position=(randint(-9,9),randint(1,9),9)),choice((True,False))]) #el choice acá determina si va a ir para la derecha o para la izquierda
 
 z_sig = 1 #solo es usado cuando el escenario es el 3
 x_sig = 1 #solo es usado cuando el escenario es el 3
 y_sig = -1 #solo es usado cuando el escenario es el 4
+#izquierda = False #solo es usado en el escenario 5
 
 Text.size = 0.025
 Text.default_resolution = 1080 * Text.size
@@ -81,7 +85,7 @@ info.visible = True
 def input(key):
     global contador_eliminaciones, contador_fallos, salir, pared1, escenario, cadencia, tiro_sonido
     
-    if escenario == 1 and key == "left mouse down":
+    if escenario in (1,5) and key == "left mouse down":
         
         tiro_sonido.play()
         acerto = False
@@ -90,9 +94,17 @@ def input(key):
             for each in esferas:
                 if each.hovered:
                     destroy(each)
-                    esferas.remove(each) # ¿ si hago esto es necesario lo de arriba? fijarse
+                    esferas.remove(each)
                     contador_eliminaciones += 1
                     acerto = True
+        elif escenario == 5:
+            for each in esferas:
+                if each[0].hovered:
+                    destroy(each[0])
+                    esferas.remove(each)
+                    contador_eliminaciones += 1
+                    acerto = True
+                    esferas.append([Entity(model="cube",scale=(1.5,1.5,1.5),color=color.red,collider="box",position=(randint(-9,9),randint(1,9),9)),choice((True,False))])
 
         if not acerto:
             contador_fallos += 1
@@ -197,6 +209,18 @@ def update():
         elif esferas[0].y <= 1:
             z_sig = 1
 
+    elif escenario == 5:
+        for each in esferas:
+            if each[1]:
+                each[0].x += 5*time.dt
+            else:
+                each[0].x -= 5*time.dt
+
+            if each[0].x >= 10:
+                each[1] = False
+            elif each[0].x <= 0:
+                each[1] = True
+                
     if salir or (eleccion_usuario==2 and obtener_tiempo() - inicio_tiempo > 60):
         if name == "nt":
             system("cls")
