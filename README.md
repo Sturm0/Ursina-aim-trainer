@@ -17,8 +17,7 @@ La cámara se controla con el mouse y se dispara con el click izquierdo. Para ce
 ## Screenshot (ejemplo)
 
 
-![1wall6targets TE](/screenshots/'1wall6targets TE'.png)
-
+![1wall6targets TE](https://github.com/Sturm0/Ursina-aim-trainer/blob/master/screenshots/1wall6targets%20TE.png?raw=true)
 
 ## Más información sobre el desarrollo
 
