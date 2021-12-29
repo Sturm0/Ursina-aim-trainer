@@ -31,6 +31,7 @@ player = FirstPersonController(position=(0,10,-5)) # por alguna razón si pongo 
 player.cursor.color = color.black
 player.speed = 0
 
+#hacer lista de paredes después
 ground = Entity(model="plane",scale=(20,1,20),color=color.white,texture="white_cube",texture_scale=(20,20),collider="box")
 pared1 = Entity(model="quad",scale=(20,10,1),position=(0,5,10),color=color.white,texture="white_cube",texture_scale=(20,16))
 pared2 = duplicate(pared1, position=(-10,5,0),rotation_y = -90)
@@ -53,10 +54,20 @@ if escenario == 1:
 elif escenario == 2:
     esferas.append(Entity(model="sphere",scale=(1,1,1),color=color.red,collider="box",position=(0,4,9)))
 elif escenario == 3:
-    esferas.append(Entity(model="sphere",scale=(1.5,5,1),color=color.red,collider="box",position=(0,2.5,9))) #la idea es en algún momento remplazarlo por un cilindro o algo que se vea más como lo de CloseLongStrafes del Kovaak
+    esferas.append(Entity(model=Cylinder(20, start=0,height=4,radius=.75), color=color.red,position=(0,0,9))) #sí, ya se que no es una esfera; pero así es más fácil
     player.position = (0,5,0)
+elif escenario == 4:
+    esferas.append(Entity(model="sphere",scale=(1,1,1),color=color.red,collider="box",position=(0,2,9))) #position=(9,9,9)
+    player.gravity = 0
+    player.positon = (0,5,0)
+
+    for each in (pared1,pared2,pared3,pared4):
+        each.scale = (20,20,1)
+        each.y = 10
+
 z_sig = 1 #solo es usado cuando el escenario es el 3
 x_sig = 1 #solo es usado cuando el escenario es el 3
+y_sig = -1 #solo es usado cuando el escenario es el 4
 
 Text.size = 0.025
 Text.default_resolution = 1080 * Text.size
@@ -88,7 +99,7 @@ def input(key):
         # if pared1.hovered: #esta es la forma más "limpia" de hacerlo pero por alguna razón no parece estar funcionando bien
         #     contador_fallos += 1
 
-    elif (escenario == 2 or escenario == 3) and (held_keys['left mouse']): # 'left mouse down' <-- no esta funcionando
+    elif (escenario in (2,3,4)) and (held_keys['left mouse']): # 'left mouse down' <-- no esta funcionando
         if cadencia == 7:
             tiro_sonido.play() # <-- buscar algo mejor para ronda de ametralladora
             acerto = False
@@ -131,27 +142,24 @@ def update():
             esferas[0].y = math.cos(math.radians(grados))*10
             grados += 50*time.dt
             if round(obtener_tiempo()-inicio_tiempo) == cambiar_direccion:
-                print("Entro :D")
                 cambiar_direccion += 1
                 if randint(0,1) == 1:
                     arriba = False
-                    print("cambio de dirección")
             if grados > 90:
                 arriba = False
         else:                
             grados -= 50*time.dt
 
             if round(obtener_tiempo()-inicio_tiempo) == cambiar_direccion:
-                print("Entro :D")
                 cambiar_direccion += 1
                 if randint(0,1) == 1:
                     arriba = True
-                    print("cambio de dirección")
             if grados < 0:
                 arriba = True
                 
         esferas[0].z = math.sin(math.radians(grados))*10
         esferas[0].y = math.cos(math.radians(grados))*10
+
     elif escenario == 3:
         esferas[0].z += 5*time.dt*z_sig
         esferas[0].x += 5*time.dt*x_sig
@@ -171,14 +179,31 @@ def update():
             x_sig = -1
         elif esferas[0].x < -10:
             x_sig = 1
+    elif escenario == 4:
+        esferas[0].y += 5*time.dt*z_sig
+        esferas[0].x += 5*time.dt*x_sig
+        if round(obtener_tiempo()-inicio_tiempo) == cambiar_direccion:
+            cambiar_direccion += 1
+            y_sig = choice((-1,1))
+            x_sig = choice((-1,1))
+
+        if esferas[0].x > 10:
+            x_sig = -1
+        elif esferas[0].x < -10:
+            x_sig = 1
+
+        if esferas[0].y >= 20:
+            z_sig = -1
+        elif esferas[0].y <= 1:
+            z_sig = 1
 
     if salir or (eleccion_usuario==2 and obtener_tiempo() - inicio_tiempo > 60):
         if name == "nt":
             system("cls")
         else:
             system("clear")
-        if escenario == 2:
-            print("Aciertos:",contador_eliminaciones)            
+        if escenario in (2,3,4):
+            print("Aciertos:",contador_eliminaciones)
         else:
             print("Eliminaciones:",contador_eliminaciones)
         print("Fallos:",contador_fallos)

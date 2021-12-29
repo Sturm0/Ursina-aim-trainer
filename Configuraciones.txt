@@ -2,5 +2,10 @@
 # True=Activado False=Desactivado
 Pantalla_completa=False
 #Elegir escenario
-Número=3
+Número=4
 #El escenario debe ser un número entero
+#Lista de escenarios
+# 1 equivalente a "1wall6targets TE"
+# 2 equivalente a "Vertical Long Strafes"
+# 3 equivalente a "Close Long Strafes"
+# 4 equivalente a "FuglaaXYLongStrafe"
