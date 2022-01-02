@@ -5,6 +5,7 @@ from time import time as obtener_tiempo
 import datetime
 from os import system,name
 import math
+import sqlite3
 
 print("Ingrese 1 o 2 respectivamente para elegir un modo")
 print("(1) Free")
@@ -22,10 +23,7 @@ with open("Configuraciones.txt",'r') as archivo:
                     app = Ursina()    
             else:
                 escenario = int(each.split("=")[1])
-                print(escenario)
-                print(type(escenario))
                 
-
 player = FirstPersonController(position=(0,10,-5)) # por alguna razón si pongo un Y inicial más lógico el jugador se empieza a caer del mundo (ni idea)
 
 player.cursor.color = color.black
@@ -54,7 +52,8 @@ if escenario == 1:
 elif escenario == 2:
     esferas.append(Entity(model="sphere",scale=(1,1,1),color=color.red,collider="box",position=(0,4,9)))
 elif escenario == 3:
-    esferas.append(Entity(model=Cylinder(20, start=0,height=4,radius=.75), color=color.red,position=(0,0,9))) #sí, ya se que no es una esfera; pero así es más fácil
+    #esferas.append(Entity(model=Cylinder(20, start=0,height=4,radius=.75), color=color.red,position=(0,0,9))) #sí, ya se que no es una esfera; pero así es más fácil
+    esferas.append(Entity(model="sphere",scale=(1.5,5,1.5), color=color.red,position=(0,5,9)))
     player.position = (0,5,0)
 elif escenario == 4:
     esferas.append(Entity(model="sphere",scale=(1,1,1),color=color.red,collider="box",position=(0,2,9))) #position=(9,9,9)
@@ -114,11 +113,14 @@ def input(key):
     elif (escenario in (2,3,4)) and (held_keys['left mouse']): # 'left mouse down' <-- no esta funcionando
         if cadencia == 7:
             tiro_sonido.play() # <-- buscar algo mejor para ronda de ametralladora
-            acerto = False
+            acerto = False            
             for each in esferas:
+                #print(each.hovered)
+                #.hovered no se hace True nunca en el escenario 3, extrañamente en otros con caracteristicas similares (1 esfera y tiro automatico, funciona perfectamente)
                 if each.hovered:
                     contador_eliminaciones += 1
                     acerto = True
+                    print("entro")
             if not acerto:
                 contador_fallos += 1
             cadencia = 0
@@ -222,15 +224,48 @@ def update():
                 each[1] = True
                 
     if salir or (eleccion_usuario==2 and obtener_tiempo() - inicio_tiempo > 60):
+
+        def camb_respct(cur,contador_el_fa,Aciertos_Fallos):
+            #esta función da el cambio respecto a otro número con un formateando de forma legible
+            cur.execute('SELECT AVG(%s) FROM Rondas WHERE "Escenario ID" == %s;'%(Aciertos_Fallos,escenario))
+            promedio_fa = cur.fetchone()[0]
+            texto_camb_respct_prom_fa = f"{(contador_el_fa*100)/promedio_fa-100 :.2f}" #texto para cambio respecto a promedio acierto o fallo
+
+            if float(texto_camb_respct_prom_fa) > 0:
+                texto_camb_respct_prom_fa = "+"+texto_camb_respct_prom_fa
+
+            return promedio_fa,texto_camb_respct_prom_fa
+
         if name == "nt":
             system("cls")
         else:
             system("clear")
+
+
+        db = sqlite3.connect("rondas_historial.sqlite")
+        cur = db.cursor()
+
+        cur.execute('INSERT INTO rondas("Nombre jugador","Escenario ID","Aciertos","Fallos") VALUES (?,?,?,?);',("Jugador1",escenario,contador_eliminaciones,contador_fallos))
+        db.commit()
+
         if escenario in (2,3,4):
             print("Aciertos:",contador_eliminaciones)
         else:
             print("Eliminaciones:",contador_eliminaciones)
         print("Fallos:",contador_fallos)
+
+
+        promedio_aciertos,texto_camb_respct_prom_acier = camb_respct(cur,contador_eliminaciones,"Aciertos") #texto para cambio respecto a promedio acierto
+        print("Cambio respecto al promedio (aciertos): ",texto_camb_respct_prom_acier,"%")
+
+        promedio_fallos,texto_camb_respct_prom_fallos = camb_respct(cur,contador_fallos,"Fallos") #texto para cambio respecto a promedio fallos
+        print("Cambio respecto al promedio (fallos): ",texto_camb_respct_prom_fallos,"%")
+
+        print("Promedio aciertos: ",f"{promedio_aciertos:.2f}")
+        print("Promedio fallos: ",f"{promedio_fallos:.2f}")
+
+        cur.close()
+        db.close()
         exit()
     info.text ="Tiempo: "+str(datetime.timedelta(seconds=round(obtener_tiempo()-inicio_tiempo)))
 
