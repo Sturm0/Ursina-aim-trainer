@@ -106,21 +106,16 @@ def input(key):
 
         if not acerto:
             contador_fallos += 1
-        # if pared1.hovered: #esta es la forma más "limpia" de hacerlo pero por alguna razón no parece estar funcionando bien
-        #     contador_fallos += 1
 
     elif (escenario in (2,3,4)) and (held_keys['left mouse']): # 'left mouse down' <-- no esta funcionando
         if cadencia == 7:
             tiro_sonido.play() # <-- buscar algo mejor para ronda de ametralladora
             acerto = False            
             for each in esferas:
-                #print(each.hovered)
-                #.hovered no se hace True nunca en el escenario 3, extrañamente en otros con caracteristicas similares (1 esfera y tiro automatico, funciona perfectamente)
                 if each.hovered:
                     contador_eliminaciones += 1
                     acerto = True
-                    print("entro")
-            print(esferas[0].hovered) # <-- esto no se pone true aunque debería en el escenario 3 ¯\_(ツ)_/¯
+                    
             if not acerto:
                 contador_fallos += 1
             cadencia = 0
@@ -225,9 +220,9 @@ def update():
                 
     if salir or (eleccion_usuario==2 and obtener_tiempo() - inicio_tiempo > 60):
 
-        def camb_respct(cur,contador_el_fa,Aciertos_Fallos):
+        def camb_respct(cur,contador_el_fa,Aciertos_Fallos,eleccion_usuario):
             #esta función da el cambio respecto a otro número con un formateando de forma legible
-            cur.execute('SELECT AVG(%s) FROM Rondas WHERE "Escenario ID" == %s;'%(Aciertos_Fallos,escenario)) # por alguna razón la sintaxis ('?',(val1)) no parece estar funcionando correctamente así que use %s en cambio
+            cur.execute('SELECT AVG(%s) FROM Rondas WHERE "Escenario ID" == %s AND "Modo" == %s;'%(Aciertos_Fallos,escenario,eleccion_usuario)) # por alguna razón la sintaxis ('?',(val1)) no parece estar funcionando correctamente así que use %s en cambio
             #cur.execute('SELECT AVG(?) FROM Rondas WHERE "Escenario ID" == ?;',(Aciertos_Fallos,escenario)) esto devuelve siempre 0.0
             promedio_fa = cur.fetchone()[0]+1*10**(-10)
             texto_camb_respct_prom_fa = f"{(contador_el_fa*100)/promedio_fa-100 :.2f}" #texto para cambio respecto a promedio acierto o fallo
@@ -246,7 +241,7 @@ def update():
         db = sqlite3.connect("rondas_historial.sqlite")
         cur = db.cursor()
 
-        cur.execute('INSERT INTO rondas("Nombre jugador","Escenario ID","Aciertos","Fallos") VALUES (?,?,?,?);',("Jugador1",escenario,contador_eliminaciones,contador_fallos))
+        cur.execute('INSERT INTO rondas("Nombre jugador","Escenario ID","Modo","Aciertos","Fallos") VALUES (?,?,?,?,?);',("Jugador1",escenario,eleccion_usuario,contador_eliminaciones,contador_fallos))
         db.commit()
 
         if escenario in (2,3,4):
@@ -256,10 +251,10 @@ def update():
         print("Fallos:",contador_fallos)
 
 
-        promedio_aciertos,texto_camb_respct_prom_acier = camb_respct(cur,contador_eliminaciones,"Aciertos") #texto para cambio respecto a promedio acierto
+        promedio_aciertos,texto_camb_respct_prom_acier = camb_respct(cur,contador_eliminaciones,"Aciertos",eleccion_usuario) #texto para cambio respecto a promedio acierto
         print("Cambio respecto al promedio (aciertos): ",texto_camb_respct_prom_acier,"%")
 
-        promedio_fallos,texto_camb_respct_prom_fallos = camb_respct(cur,contador_fallos,"Fallos") #texto para cambio respecto a promedio fallos
+        promedio_fallos,texto_camb_respct_prom_fallos = camb_respct(cur,contador_fallos,"Fallos",eleccion_usuario) #texto para cambio respecto a promedio fallos
         print("Cambio respecto al promedio (fallos): ",texto_camb_respct_prom_fallos,"%")
 
         print("Promedio aciertos: ",f"{promedio_aciertos:.2f}")
