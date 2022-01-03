@@ -52,8 +52,7 @@ if escenario == 1:
 elif escenario == 2:
     esferas.append(Entity(model="sphere",scale=(1,1,1),color=color.red,collider="box",position=(0,4,9)))
 elif escenario == 3:
-    #esferas.append(Entity(model=Cylinder(20, start=0,height=4,radius=.75), color=color.red,position=(0,0,9))) #sí, ya se que no es una esfera; pero así es más fácil
-    esferas.append(Entity(model="sphere",scale=(1.5,5,1.5), color=color.red,position=(0,5,9)))
+    esferas.append(Entity(model=Cylinder(20, start=0,height=4,radius=.75), color=color.red,position=(0,0,9),collider="box")) #sí, ya se que no es una esfera; pero así es más fácil
     player.position = (0,5,0)
 elif escenario == 4:
     esferas.append(Entity(model="sphere",scale=(1,1,1),color=color.red,collider="box",position=(0,2,9))) #position=(9,9,9)
@@ -121,6 +120,7 @@ def input(key):
                     contador_eliminaciones += 1
                     acerto = True
                     print("entro")
+            print(esferas[0].hovered) # <-- esto no se pone true aunque debería en el escenario 3 ¯\_(ツ)_/¯
             if not acerto:
                 contador_fallos += 1
             cadencia = 0
@@ -227,8 +227,9 @@ def update():
 
         def camb_respct(cur,contador_el_fa,Aciertos_Fallos):
             #esta función da el cambio respecto a otro número con un formateando de forma legible
-            cur.execute('SELECT AVG(%s) FROM Rondas WHERE "Escenario ID" == %s;'%(Aciertos_Fallos,escenario))
-            promedio_fa = cur.fetchone()[0]
+            cur.execute('SELECT AVG(%s) FROM Rondas WHERE "Escenario ID" == %s;'%(Aciertos_Fallos,escenario)) # por alguna razón la sintaxis ('?',(val1)) no parece estar funcionando correctamente así que use %s en cambio
+            #cur.execute('SELECT AVG(?) FROM Rondas WHERE "Escenario ID" == ?;',(Aciertos_Fallos,escenario)) esto devuelve siempre 0.0
+            promedio_fa = cur.fetchone()[0]+1*10**(-10)
             texto_camb_respct_prom_fa = f"{(contador_el_fa*100)/promedio_fa-100 :.2f}" #texto para cambio respecto a promedio acierto o fallo
 
             if float(texto_camb_respct_prom_fa) > 0:

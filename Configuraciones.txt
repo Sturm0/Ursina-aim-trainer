@@ -2,7 +2,7 @@
 # True=Activado False=Desactivado
 Pantalla_completa=False
 #Elegir escenario
-Número=1
+Número=3
 #El escenario debe ser un número entero
 #Lista de escenarios
 # 1 equivalente a "1wall6targets TE"
