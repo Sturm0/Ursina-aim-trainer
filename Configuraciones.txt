@@ -10,3 +10,5 @@ Número=1
 # 3 equivalente a "Close Long Strafes"
 # 4 equivalente a "FuglaaXYLongStrafe"
 # 5 equivalente a "Tile Frenzy - Strafing - 01"
+#Sensibilidad, el primer valor es la sensibilidad para el eje de las X y el segundo para el eje de las Y
+Sensbilidad=(40,40)

@@ -21,11 +21,13 @@ with open("Configuraciones.txt",'r') as archivo:
                     app = Ursina(fullscreen=True)
                 else:
                     app = Ursina()    
-            else:
+            elif each.split("=")[0] == "Número":
                 escenario = int(each.split("=")[1])
+            else:
+                sensibilidad = eval(each.split("=")[1])
                 
 player = FirstPersonController(position=(0,10,-5)) # por alguna razón si pongo un Y inicial más lógico el jugador se empieza a caer del mundo (ni idea)
-
+player.mouse_sensitivity = Vec2(sensibilidad[0], sensibilidad[1])
 player.cursor.color = color.black
 player.speed = 0
 
