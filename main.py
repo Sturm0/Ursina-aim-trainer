@@ -7,6 +7,15 @@ from os import system,name
 import math
 import sqlite3
 
+
+print('Lista de escenarios:')
+print('1 equivalente a "1wall6targets TE"')
+print('2 equivalente a "Vertical Long Strafes"')
+print('3 equivalente a "Close Long Strafes"')
+print('4 equivalente a "FuglaaXYLongStrafe"')
+print('5 equivalente a "Tile Frenzy - Strafing - 01"')
+escenario = int(input("Ingrese el número del escenario: "))
+
 print("Ingrese 1 o 2 respectivamente para elegir un modo")
 print("(1) Free")
 print("(2) Challenge")
@@ -21,8 +30,6 @@ with open("Configuraciones.txt",'r') as archivo:
                     app = Ursina(fullscreen=True)
                 else:
                     app = Ursina()    
-            elif each.split("=")[0] == "Número":
-                escenario = int(each.split("=")[1])
             else:
                 sensibilidad = eval(each.split("=")[1])
                 

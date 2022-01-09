@@ -5,7 +5,6 @@ Es un aim trainer 3D similar al Kovaak. La idea de este proyecto es lograr una v
 
 Para su desarrollo se utilizo python 3.9.7 y ursina 4.0.0. Probablemente funcione sin mayor problema en cualquier versión de python 3.x (aunque aclaro que no hice pruebas).
 
-Para cambiar entre escenarios utilizar "Configuraciones.txt"
 
 Al iniciar se pregunta por el modo "free" o "challenge". "Free" es tiempo ilimitado y "challenge" tiene un tiempo límite de 1 minuto.
 

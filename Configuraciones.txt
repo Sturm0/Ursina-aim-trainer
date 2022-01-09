@@ -1,14 +1,5 @@
 #Archivo de configuraciones
 # True=Activado False=Desactivado
 Pantalla_completa=True
-#Elegir escenario
-Número=1
-#El escenario debe ser un número entero
-#Lista de escenarios
-# 1 equivalente a "1wall6targets TE"
-# 2 equivalente a "Vertical Long Strafes"
-# 3 equivalente a "Close Long Strafes"
-# 4 equivalente a "FuglaaXYLongStrafe"
-# 5 equivalente a "Tile Frenzy - Strafing - 01"
 #Sensibilidad, el primer valor es la sensibilidad para el eje de las X y el segundo para el eje de las Y
 Sensbilidad=(40,40)
