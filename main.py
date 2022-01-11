@@ -14,6 +14,7 @@ print('2 equivalente a "Vertical Long Strafes"')
 print('3 equivalente a "Close Long Strafes"')
 print('4 equivalente a "FuglaaXYLongStrafe"')
 print('5 equivalente a "Tile Frenzy - Strafing - 01"')
+#print('6 equivalente a "LG Pin Practice 360"') <-- en desarrollo
 escenario = int(input("Ingrese el número del escenario: "))
 
 print("Ingrese 1 o 2 respectivamente para elegir un modo")
@@ -55,6 +56,7 @@ grados = 0
 tiro_sonido = Audio("shot.mp3")
 cambiar_direccion = 2
 
+
 if escenario == 1:
     for each in range(0,6):
         esferas.append(Entity(model="sphere",scale=(.8,.8,.8),color=color.red,collider="box",position=(randint(-9,9),randint(1,9),9)))
@@ -74,6 +76,71 @@ elif escenario == 4:
 elif escenario == 5:
     for each in range(0,5):
         esferas.append([Entity(model="cube",scale=(1.5,1.5,1.5),color=color.red,collider="box",position=(randint(-9,9),randint(1,9),9)),choice((True,False))]) #el choice acá determina si va a ir para la derecha o para la izquierda
+elif escenario == 6:
+    val_scal = (pared1.scale_x*2,pared1.scale_y*2,pared1.scale_z)
+
+    for each in (pared1,pared2,pared3,pared4):
+        each.scale = (val_scal[0],val_scal[1],val_scal[2])
+        each.texture_scale = (val_scal[0],val_scal[1]) #revisar como afecta el tamaño de las texturas al rendimiento
+
+    ground.scale = (ground.scale[0]*2,ground.scale[1],ground.scale[2]*2)
+    print("ESTO:",ground.scale)
+    ground.texture_scale = (ground.scale[0],ground.scale[2])
+
+    pared1.z *= 2
+    pared2.x *= 2
+    pared3.x *= 2
+    pared4.z *= 2
+
+    player.position = (0,1,0)
+    player.gravity = 0
+
+    for each in (pared1,pared2,pared3,pared4):
+        each.color = color.rgba(255,255,255,20)
+    class Cilindro(Entity):
+        def __init__(self):
+            super().__init__(self, model=Cylinder(20, start=0,height=4,radius=.75), color=color.red,position=(randint(-20,20),1,randint(-20,20)),collider="box")
+            self.saltar = True
+            self.vidas = 20
+            self.x_direccion = 1
+            self.z_direccion = 1
+
+        def movimiento(self,pared1):
+            if self.saltar:
+
+                self.y += time.dt*5
+                self.x = self.x + self.x_direccion * time.dt * 5
+                self.z = self.z + self.z_direccion * time.dt * 5
+            else:
+                self.y -= time.dt*5
+                self.x = self.x + self.x_direccion * time.dt * 5
+                self.z = self.z + self.z_direccion * time.dt * 5
+
+            if self.y <= 0:
+                self.x_direccion = choice((1,-1))
+                self.z_direccion = choice((1,-1))
+                self.saltar = True
+                
+            if self.x >= 20:
+                self.x_direccion = -1
+                
+            if self.x <= -20:
+                self.x_direccion = 1
+                
+            if self.z >= 20:
+                self.z_direccion = -1
+            if self.z <= -20:
+                
+                self.z_direccion = 1
+
+            if self.y > pared1.scale_y:
+                self.saltar = False
+                
+
+    for each in range(0,5):
+        #esferas.append(Entity(model=Cylinder(20, start=0,height=4,radius=.75), color=color.red,position=(randint(-20,20),1,randint(-20,20)),collider="box"))
+        esferas.append(Cilindro())
+        
 
 z_sig = 1 #solo es usado cuando el escenario es el 3
 x_sig = 1 #solo es usado cuando el escenario es el 3
@@ -91,7 +158,6 @@ info.background = True
 info.visible = True
 def input(key):
     global contador_eliminaciones, contador_fallos, salir, pared1, escenario, cadencia, tiro_sonido
-    
     if escenario in (1,5) and key == "left mouse down":
         
         tiro_sonido.play()
@@ -116,7 +182,7 @@ def input(key):
         if not acerto:
             contador_fallos += 1
 
-    elif (escenario in (2,3,4)) and (held_keys['left mouse']): # 'left mouse down' <-- no esta funcionando
+    elif (escenario in (2,3,4,6)) and (held_keys['left mouse']): # 'left mouse down' <-- no esta funcionando
         if cadencia == 7:
             tiro_sonido.play() # <-- buscar algo mejor para ronda de ametralladora
             acerto = False            
@@ -124,6 +190,12 @@ def input(key):
                 if each.hovered:
                     contador_eliminaciones += 1
                     acerto = True
+
+                    if escenario == 6:
+                        each.vidas -= 1
+                        if each.vidas <= 0:
+                            destroy(each)
+                            esferas.remove(each)
                     
             if not acerto:
                 contador_fallos += 1
@@ -142,7 +214,7 @@ def input(key):
 
 arriba = True
 def update():
-    global esferas, poner_esfera, contador_eliminaciones, contador_fallos,inicio_tiempo, info, salir, escenario, arriba, grados, cambiar_direccion,x_sig,z_sig
+    global esferas, poner_esfera, contador_eliminaciones, contador_fallos,inicio_tiempo, info, salir, escenario, arriba, grados, cambiar_direccion,x_sig,z_sig, pared1
     
     if held_keys['left mouse']: #para más información sobre porque puse esto acá y no en input() directo referir a los comentarios de la línea ~100-108
        input('left mouse')
@@ -226,6 +298,10 @@ def update():
                 each[1] = False
             elif each[0].x <= 0:
                 each[1] = True
+
+    elif escenario == 6:
+        for each in esferas:
+            each.movimiento(pared1)
                 
     if salir or (eleccion_usuario==2 and obtener_tiempo() - inicio_tiempo > 60):
 
@@ -241,10 +317,10 @@ def update():
 
             return promedio_fa,texto_camb_respct_prom_fa
 
-        if name == "nt":
-            system("cls")
-        else:
-            system("clear")
+        # if name == "nt":
+        #     system("cls")
+        # else:
+        #     system("clear")
 
 
         db = sqlite3.connect("rondas_historial.sqlite")
