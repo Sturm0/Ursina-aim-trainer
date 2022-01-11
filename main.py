@@ -99,7 +99,7 @@ elif escenario == 6:
         each.color = color.rgba(255,255,255,20)
     class Cilindro(Entity):
         def __init__(self):
-            super().__init__(self, model=Cylinder(20, start=0,height=4,radius=.75), color=color.red,position=(randint(-20,20),1,randint(-20,20)),collider="box")
+            super().__init__(self, model=Cylinder(20, start=0,height=4,radius=.75), color=color.red,position=(randint(-20,20),randint(1,5),randint(-20,20)),collider="box")
             self.saltar = True
             self.vidas = 20
             self.x_direccion = 1
@@ -137,10 +137,10 @@ elif escenario == 6:
                 self.saltar = False
                 
 
-    for each in range(0,5):
+    for index,each in enumerate(range(0,5),0):
         #esferas.append(Entity(model=Cylinder(20, start=0,height=4,radius=.75), color=color.red,position=(randint(-20,20),1,randint(-20,20)),collider="box"))
         esferas.append(Cilindro())
-        
+        esferas[index].saltar = choice((True, False))
 
 z_sig = 1 #solo es usado cuando el escenario es el 3
 x_sig = 1 #solo es usado cuando el escenario es el 3
@@ -196,6 +196,8 @@ def input(key):
                         if each.vidas <= 0:
                             destroy(each)
                             esferas.remove(each)
+                            esferas.append(Cilindro())
+                            esferas[len(esferas)-1].saltar = choice((True, False))
                     
             if not acerto:
                 contador_fallos += 1
