@@ -113,13 +113,13 @@ elif escenario == 6:
         def movimiento(self,pared1):
             if self.saltar:
 
-                self.y += time.dt*1
-                self.x = self.x + self.x_direccion * time.dt * 1
-                self.z = self.z + self.z_direccion * time.dt * 1
+                self.y += time.dt*5
+                self.x = self.x + self.x_direccion * time.dt * 5
+                self.z = self.z + self.z_direccion * time.dt * 5
             else:
-                self.y -= time.dt*1
-                self.x = self.x + self.x_direccion * time.dt * 1
-                self.z = self.z + self.z_direccion * time.dt * 1
+                self.y -= time.dt*5
+                self.x = self.x + self.x_direccion * time.dt * 5
+                self.z = self.z + self.z_direccion * time.dt * 5
 
             if self.y <= 0:
                 self.x_direccion = choice((1,-1))
@@ -214,36 +214,47 @@ def input(key):
         else:
             cadencia += 1
     elif escenario == 6:
-        origin = cubo_referencia.world_position
-        rayo = boxcast(origin, direction=cubo_referencia.forward, distance=50, thickness=(.025,.025),debug=True)
-        
-        print("hit:",rayo.hit)
-        if rayo.normal != None:
-            print("point:",rayo.point)
-            for each in esferas:
-                if each.hovered: # <-- debería haber otra forma mejor de hacerlo pero por ahora creo que va a servir
-                    if rayo.normal[0] > 0:
-                        each.x -= 1
-                        each.z += 1
-                        #pass
-                    elif rayo.normal[0] == 0:
-                        #if each.z >= 10 or (each.z >= -3 and each.z <= 0 and each.x >= -3 and each.x <= 3):
-                        if each.x > 0 and each.z > 0:
-                            each.x += 1
-                            each.z += 1
-                        elif each < 0 and each.z > 0:
-                            each.x -= 1
-                            each.z += 1
-                        elif each.x < 0 and each.z < 0:
-                          each.x -= 1
-                          each.z -= 1
-                        elif each.x > 0 and each.z < 0:
-                          each.x += 1
-                          each.z -= 1
-                    else:
-                        each.x += 1
-                        each.z += 1
-                        #pass
+        if cadencia == 7:
+            origin = cubo_referencia.world_position
+            rayo = boxcast(origin, direction=cubo_referencia.forward, distance=50, thickness=(.025,.025),debug=True)
+            
+            print("hit:",rayo.hit)
+            if rayo.normal != None:
+                print("point:",rayo.point)
+                for each in esferas:
+                    if each.hovered: # <-- debería haber otra forma mejor de hacerlo pero por ahora creo que va a servir
+                        if rayo.normal[0] > 0 and each.z > 0:
+                            each.x -= .5
+                            each.z += .5
+                            #pass
+                        elif rayo.normal[0] < 0 and each.z > 0:
+                            each.x += .5
+                            each.z += .5
+                            #pass
+                        elif rayo.normal[0] > 0 and each.z < 0:
+                            each.x -= .5
+                            each.z -= .5
+                        elif rayo.normal[0] < 0 and each.z < 0:
+                            each.x += .5
+                            each.z -= .5    
+                        else:
+                            #if each.z >= 10 or (each.z >= -3 and each.z <= 0 and each.x >= -3 and each.x <= 3):
+                            if each.x > 0 and each.z > 0:
+                                each.x += .5
+                                each.z += .5
+                            elif each < 0 and each.z > 0:
+                                each.x -= .5
+                                each.z += .5
+                            elif each.x < 0 and each.z < 0:
+                              each.x -= .5
+                              each.z -= .5
+                            elif each.x > 0 and each.z < 0:
+                              each.x += .5
+                              each.z -= .5
+            cadencia = 0
+        else:
+            cadencia += 1
+                    
 
     elif key == "escape":
         salir = True
