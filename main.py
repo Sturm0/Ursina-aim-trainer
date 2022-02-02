@@ -14,7 +14,8 @@ print('2 equivalente a "Vertical Long Strafes"')
 print('3 equivalente a "Close Long Strafes"')
 print('4 equivalente a "FuglaaXYLongStrafe"')
 print('5 equivalente a "Tile Frenzy - Strafing - 01"')
-#print('6 equivalente a "LG Pin Practice 360"') <-- en desarrollo
+print('6 equivalente a "LG Pin Practice 360"') #<-- en desarrollo
+
 escenario = int(input("Ingrese el número del escenario: "))
 
 print("Ingrese 1 o 2 respectivamente para elegir un modo")
@@ -38,6 +39,7 @@ player = FirstPersonController(position=(0,10,-5)) # por alguna razón si pongo 
 player.mouse_sensitivity = Vec2(sensibilidad[0], sensibilidad[1])
 player.cursor.color = color.black
 player.speed = 0
+cubo_referencia = Entity(parent=player.camera_pivot,model="cube",scale=(.001,.001,.001),color=color.red,position=(0,0,2))
 
 #hacer lista de paredes después
 ground = Entity(model="plane",scale=(20,1,20),color=color.white,texture="white_cube",texture_scale=(20,20),collider="box")
@@ -84,7 +86,7 @@ elif escenario == 6:
         each.texture_scale = (val_scal[0],val_scal[1]) #revisar como afecta el tamaño de las texturas al rendimiento
 
     ground.scale = (ground.scale[0]*2,ground.scale[1],ground.scale[2]*2)
-    print("ESTO:",ground.scale)
+    #print("ESTO:",ground.scale)
     ground.texture_scale = (ground.scale[0],ground.scale[2])
 
     pared1.z *= 2
@@ -100,6 +102,9 @@ elif escenario == 6:
     class Cilindro(Entity):
         def __init__(self):
             super().__init__(self, model=Cylinder(20, start=0,height=4,radius=.75), color=color.red,position=(randint(-20,20),randint(1,5),randint(-20,20)),collider="box")
+            
+            self.collider = BoxCollider(self,center=(0,2,0),size=(1.5,4,1.5))
+            self.collider.visible = True #<-- aparentemente el colisionador de tipo caja no funciona del todo bien en cilindros
             self.saltar = True
             self.vidas = 20
             self.x_direccion = 1
@@ -108,13 +113,13 @@ elif escenario == 6:
         def movimiento(self,pared1):
             if self.saltar:
 
-                self.y += time.dt*5
-                self.x = self.x + self.x_direccion * time.dt * 5
-                self.z = self.z + self.z_direccion * time.dt * 5
+                self.y += time.dt*1
+                self.x = self.x + self.x_direccion * time.dt * 1
+                self.z = self.z + self.z_direccion * time.dt * 1
             else:
-                self.y -= time.dt*5
-                self.x = self.x + self.x_direccion * time.dt * 5
-                self.z = self.z + self.z_direccion * time.dt * 5
+                self.y -= time.dt*1
+                self.x = self.x + self.x_direccion * time.dt * 1
+                self.z = self.z + self.z_direccion * time.dt * 1
 
             if self.y <= 0:
                 self.x_direccion = choice((1,-1))
@@ -141,6 +146,8 @@ elif escenario == 6:
         #esferas.append(Entity(model=Cylinder(20, start=0,height=4,radius=.75), color=color.red,position=(randint(-20,20),1,randint(-20,20)),collider="box"))
         esferas.append(Cilindro())
         esferas[index].saltar = choice((True, False))
+        
+#esferas.append(Entity(model="sphere",scale=(1,1,1),color=color.red,collider="box",position=(10,1,0)))
 
 z_sig = 1 #solo es usado cuando el escenario es el 3
 x_sig = 1 #solo es usado cuando el escenario es el 3
@@ -157,7 +164,7 @@ info.origin = (-.5,.5)
 info.background = True
 info.visible = True
 def input(key):
-    global contador_eliminaciones, contador_fallos, salir, pared1, escenario, cadencia, tiro_sonido
+    global contador_eliminaciones, contador_fallos, salir, pared1, escenario, cadencia, tiro_sonido, cubo_referencia, esferas
     if escenario in (1,5) and key == "left mouse down":
         
         tiro_sonido.play()
@@ -182,7 +189,7 @@ def input(key):
         if not acerto:
             contador_fallos += 1
 
-    elif (escenario in (2,3,4,6)) and (held_keys['left mouse']): # 'left mouse down' <-- no esta funcionando
+    elif (escenario in (2,3,4)) and (held_keys['left mouse']): # 'left mouse down' <-- no esta funcionando
         if cadencia == 7:
             tiro_sonido.play() # <-- buscar algo mejor para ronda de ametralladora
             acerto = False            
@@ -193,6 +200,8 @@ def input(key):
 
                     if escenario == 6:
                         each.vidas -= 1
+                        #each.x -=
+                        #each.z -=
                         if each.vidas <= 0:
                             destroy(each)
                             esferas.remove(each)
@@ -204,6 +213,37 @@ def input(key):
             cadencia = 0
         else:
             cadencia += 1
+    elif escenario == 6:
+        origin = cubo_referencia.world_position
+        rayo = boxcast(origin, direction=cubo_referencia.forward, distance=50, thickness=(.025,.025),debug=True)
+        
+        print("hit:",rayo.hit)
+        if rayo.normal != None:
+            print("point:",rayo.point)
+            for each in esferas:
+                if each.hovered: # <-- debería haber otra forma mejor de hacerlo pero por ahora creo que va a servir
+                    if rayo.normal[0] > 0:
+                        each.x -= 1
+                        each.z += 1
+                        #pass
+                    elif rayo.normal[0] == 0:
+                        #if each.z >= 10 or (each.z >= -3 and each.z <= 0 and each.x >= -3 and each.x <= 3):
+                        if each.x > 0 and each.z > 0:
+                            each.x += 1
+                            each.z += 1
+                        elif each < 0 and each.z > 0:
+                            each.x -= 1
+                            each.z += 1
+                        elif each.x < 0 and each.z < 0:
+                          each.x -= 1
+                          each.z -= 1
+                        elif each.x > 0 and each.z < 0:
+                          each.x += 1
+                          each.z -= 1
+                    else:
+                        each.x += 1
+                        each.z += 1
+                        #pass
 
     elif key == "escape":
         salir = True
@@ -253,6 +293,7 @@ def update():
         esferas[0].y = math.cos(math.radians(grados))*10
 
     elif escenario == 3:
+
         esferas[0].z += 5*time.dt*z_sig
         esferas[0].x += 5*time.dt*x_sig
         #print("z: ",esferas[0].z,"x: ",esferas[0].x)
