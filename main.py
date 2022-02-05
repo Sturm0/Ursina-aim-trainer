@@ -14,7 +14,7 @@ print('2 equivalente a "Vertical Long Strafes"')
 print('3 equivalente a "Close Long Strafes"')
 print('4 equivalente a "FuglaaXYLongStrafe"')
 print('5 equivalente a "Tile Frenzy - Strafing - 01"')
-print('6 equivalente a "LG Pin Practice 360"') #<-- en desarrollo
+print('6 equivalente a "LG Pin Practice 360"')
 
 escenario = int(input("Ingrese el número del escenario: "))
 
@@ -53,7 +53,7 @@ esferas = []
 contador_eliminaciones = 0
 contador_fallos = 0
 inicio_tiempo = obtener_tiempo()
-cadencia = 5
+cadencia = 2
 grados = 0
 tiro_sonido = Audio("shot.mp3")
 cambiar_direccion = 2
@@ -98,28 +98,42 @@ elif escenario == 6:
     player.gravity = 0
 
     for each in (pared1,pared2,pared3,pared4):
-        each.color = color.rgba(255,255,255,20)
+        each.color = color.rgba(255,255,255,255)
     class Cilindro(Entity):
         def __init__(self):
             super().__init__(self, model=Cylinder(20, start=0,height=4,radius=.75), color=color.red,position=(randint(-20,20),randint(1,5),randint(-20,20)),collider="box")
             
             self.collider = BoxCollider(self,center=(0,2,0),size=(1.5,4,1.5))
-            self.collider.visible = True #<-- aparentemente el colisionador de tipo caja no funciona del todo bien en cilindros
+            #self.collider.visible = True #<-- aparentemente el colisionador de tipo caja no funciona del todo bien en cilindros
             self.saltar = True
             self.vidas = 20
             self.x_direccion = 1
             self.z_direccion = 1
+            self.esta_siendo_golpeado = False
+        def __dir_sent(self,cilindro,signoX,signoZ):
+            #esta función es utilizada para el movimiento de los cilindros en el escenario 6
+            global ground
+            if .75-ground.scale_x/2 < cilindro.x < -.75+ground.scale_x/2 and .75-ground.scale_z/2 < cilindro.z < -.75+ground.scale_z/2:
+            
+                cilindro.x = cilindro.x + signoX*.5
+                cilindro.z = cilindro.z + signoZ*.5
+                cilindro.x_direccion = signoX*1
+                cilindro.z_direccion = signoZ*1
 
         def movimiento(self,pared1):
+            
             if self.saltar:
 
                 self.y += time.dt*5
-                self.x = self.x + self.x_direccion * time.dt * 5
-                self.z = self.z + self.z_direccion * time.dt * 5
+                if not self.esta_siendo_golpeado: #quizá es buena idea solo desactivar el movimiento vertical acá cuando esta siendo golpeado
+
+                    self.x = self.x + self.x_direccion * time.dt * 5
+                    self.z = self.z + self.z_direccion * time.dt * 5
             else:
                 self.y -= time.dt*5
-                self.x = self.x + self.x_direccion * time.dt * 5
-                self.z = self.z + self.z_direccion * time.dt * 5
+                if not self.esta_siendo_golpeado: #quizá es buena idea solo desactivar el movimiento vertical acá cuando esta siendo golpeado
+                    self.x = self.x + self.x_direccion * time.dt * 5
+                    self.z = self.z + self.z_direccion * time.dt * 5
 
             if self.y <= 0:
                 self.x_direccion = choice((1,-1))
@@ -140,6 +154,28 @@ elif escenario == 6:
 
             if self.y > pared1.scale_y:
                 self.saltar = False
+
+        def movimiento_rayo(self,rayo):
+            #esta función maneja el movimiento cuando el cilindro es chocado por un rayo
+            if rayo.normal[0] > 0 and self.z > 0:
+                self.__dir_sent(self,-1,1)
+            elif rayo.normal[0] < 0 and self.z > 0:
+                self.__dir_sent(self,1,1)
+
+            elif rayo.normal[0] > 0 and self.z < 0:
+                self.__dir_sent(self,-1,-1)
+            elif rayo.normal[0] < 0 and self.z < 0:
+                self.__dir_sent(self,1,-1)
+            else:
+                if self.x > 0 and self.z > 0:
+                    self.__dir_sent(self,1,1)
+                elif self < 0 and self.z > 0:
+                    self.__dir_sent(self,-1,1)
+                elif self.x < 0 and self.z < 0:
+                    self.__dir_sent(self,-1,-1)
+                elif self.x > 0 and self.z < 0:
+                    self.__dir_sent(self,1,-1)
+            
                 
 
     for index,each in enumerate(range(0,5),0):
@@ -157,12 +193,16 @@ y_sig = -1 #solo es usado cuando el escenario es el 4
 Text.size = 0.025
 Text.default_resolution = 1080 * Text.size
 
+
+
+#sección para texto de tiempo
 info = Text(text="Tiempo: "+str(datetime.timedelta(seconds=round(obtener_tiempo()-inicio_tiempo))))
 info.x = -.86
 info.y = .47
 info.origin = (-.5,.5)
 info.background = True
 info.visible = True
+
 def input(key):
     global contador_eliminaciones, contador_fallos, salir, pared1, escenario, cadencia, tiro_sonido, cubo_referencia, esferas
     if escenario in (1,5) and key == "left mouse down":
@@ -198,65 +238,41 @@ def input(key):
                     contador_eliminaciones += 1
                     acerto = True
 
-                    if escenario == 6:
-                        each.vidas -= 1
-                        #each.x -=
-                        #each.z -=
-                        if each.vidas <= 0:
-                            destroy(each)
-                            esferas.remove(each)
-                            esferas.append(Cilindro())
-                            esferas[len(esferas)-1].saltar = choice((True, False))
-                    
+
             if not acerto:
                 contador_fallos += 1
             cadencia = 0
         else:
             cadencia += 1
     elif escenario == 6:
-        if cadencia == 7:
+
+        if cadencia == 2: #cadencia == 7
             origin = cubo_referencia.world_position
-            rayo = boxcast(origin, direction=cubo_referencia.forward, distance=50, thickness=(.025,.025),debug=True)
+            rayo = raycast(origin, direction=cubo_referencia.forward, distance=50, debug=True)
             
-            print("hit:",rayo.hit)
+            
             if rayo.normal != None:
-                print("point:",rayo.point)
+                
                 for each in esferas:
+                    #esto debería estar dentro de la clase cilindro, ya que refiere a su movimiento
                     if each.hovered: # <-- debería haber otra forma mejor de hacerlo pero por ahora creo que va a servir
-                        if rayo.normal[0] > 0 and each.z > 0:
-                            each.x -= .5
-                            each.z += .5
-                            #pass
-                        elif rayo.normal[0] < 0 and each.z > 0:
-                            each.x += .5
-                            each.z += .5
-                            #pass
-                        elif rayo.normal[0] > 0 and each.z < 0:
-                            each.x -= .5
-                            each.z -= .5
-                        elif rayo.normal[0] < 0 and each.z < 0:
-                            each.x += .5
-                            each.z -= .5    
-                        else:
-                            #if each.z >= 10 or (each.z >= -3 and each.z <= 0 and each.x >= -3 and each.x <= 3):
-                            if each.x > 0 and each.z > 0:
-                                each.x += .5
-                                each.z += .5
-                            elif each < 0 and each.z > 0:
-                                each.x -= .5
-                                each.z += .5
-                            elif each.x < 0 and each.z < 0:
-                              each.x -= .5
-                              each.z -= .5
-                            elif each.x > 0 and each.z < 0:
-                              each.x += .5
-                              each.z -= .5
+                        each.esta_siendo_golpeado = True
+                        each.movimiento_rayo(rayo)
+
+                        each.vidas -= 1
+                        if each.vidas <= 0:
+                            destroy(each)
+                            esferas.remove(each)
+                            esferas.append(Cilindro())
+                            esferas[len(esferas)-1].saltar = choice((True, False))
+                    else:
+                        each.esta_siendo_golpeado = False
             cadencia = 0
         else:
             cadencia += 1
                     
 
-    elif key == "escape":
+    if key == "escape":
         salir = True
 
     # held keys tiene un comportamiento diferente si es "u" o si es "left mouse down", parece que lo mismo ocurre con todas las teclas con respecto a "left mouse down", "left mouse" solo tampoco parece tener el mismo comportamiento que el resto de teclas

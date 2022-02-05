@@ -21,4 +21,4 @@ La cámara se controla con el mouse y se dispara con el click izquierdo. Para ce
 ## Más información sobre el desarrollo
 
 
-Actualmente estan adaptados escenarios equivalentes a "1wall6targets TE", "Vertical Long Strafes", "Close Long Strafes" y "FuglaaXYLongStrafe".
+Actualmente estan adaptados escenarios equivalentes a "1wall6targets TE", "Vertical Long Strafes", "Close Long Strafes", "FuglaaXYLongStrafe" y "LG Pin Practice 360".
